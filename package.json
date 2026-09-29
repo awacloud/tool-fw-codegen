@@ -1,0 +1,47 @@
+{
+  "name": "@awacloud/tool-fw-codegen",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "description": "Code-generation tools for @awacloud/fw-shaped packages: generates the module-name to factory instance-type registry, injects the deps companion field on modules, and produces a read-only audit report of factory return-type annotations.",
+  "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "fw-codegen": "bin/fw-codegen.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./registry": "./src/registry/index.js",
+    "./deps": "./src/deps/index.js",
+    "./audit": "./src/audit/index.js"
+  },
+  "files": [
+    "bin/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.ts",
+    "!src/**/*.test.js",
+    "!src/**/*.test.ts",
+    "docs",
+    "README.md",
+    "CHANGELOG.md",
+    "NOTICE"
+  ],
+  "dependencies": {
+    "@awacloud/tool-fw-bundler": "0.1.0"
+  },
+  "awa": {
+    "maturity": "L2",
+    "coverageFloor": 0.85
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/awacloud/awa.git",
+    "directory": "tools/fw-codegen"
+  },
+  "homepage": "https://awaforge.eu",
+  "bugs": {
+    "url": "https://github.com/awacloud/awa/issues"
+  },
+  "author": "Matthieu Bouilloux",
+  "company": "AwaCloud SAS",
+  "copyright": "Copyright (c) 2026 AwaCloud SAS"
+}
