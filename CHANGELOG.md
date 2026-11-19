@@ -5,6 +5,12 @@ All notable changes to this package are documented here. Format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-19
+
+### Changed
+
+- Depends on `@awacloud/tool-fw-bundler` 0.1.1, which reads the frozen module registry of fw 1.0.
+
 ## [0.1.0] - 2026-09-29
 
 ### Fixed

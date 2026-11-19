@@ -1,26 +1,17 @@
 # @awacloud/tool-fw-codegen
 
-Code-generation tools for `@awacloud/fw`-shaped packages: the `registry` generator
-(the module-name → factory instance-type map that powers `@awacloud/fw/typed`), the
-`deps` one-shot injector (fills the `deps: [...]` companion field on modules
-declaring string-form `dependencies`), and the `audit` read-only report
-(classifies each module's factory `@returns` annotation into
-LOSSY/INFER/INLINE/TYPED buckets). Generalised to any fw-shaped package via a
-`--pkg` / `--src` seam.
+Generate the typed registry, inject `deps` companion fields and audit factory return types for fw-shaped packages, from one CLI.
+
+Three subcommands: the `registry` generator (the module-name → factory
+instance-type map that powers `@awacloud/fw/typed`), the `deps` one-shot
+injector (fills the `deps: [...]` companion field on modules declaring
+string-form `dependencies`), and the `audit` read-only report (classifies each
+module's factory `@returns` annotation into LOSSY/INFER/INLINE/TYPED
+buckets). Generalised to any fw-shaped package via a `--pkg` / `--src` seam.
 
 The shared fw-module substrate (`scanAll`, `relativeImport`, …) is consumed from
 `@awacloud/tool-fw-bundler/modlib` (a devDep). No `scan-modules.js` is
 re-copied into this package.
-
-## Consumption shape
-
-**Autonomous — standalone `bin`.** This package ships its own `fw-codegen`
-executable (`bin/fw-codegen.ts`, a thin delegate to `src/index.ts` — no
-argument parsing duplicated), so it runs directly once installed:
-
-```bash
-bunx fw-codegen registry --pkg packages/front/fw --check
-```
 
 ## Installation
 
@@ -30,30 +21,30 @@ npm install --save-dev @awacloud/tool-fw-codegen
 
 Runs under Bun (the `bin` is TypeScript executed by Bun).
 
-## Quick Start
+## Quick start
 
 ```bash
 # Regenerate a package's typed-runtime registry (defaults to the current dir)
-bunx fw-codegen registry --pkg packages/front/fw
+bunx fw-codegen registry --pkg path/to/fw-shaped-package
 
 # Verify the registry is up to date (exit 1 if stale)
-bunx fw-codegen registry --pkg packages/front/fw --check
+bunx fw-codegen registry --pkg path/to/fw-shaped-package --check
 
 # Inject the `deps: [...]` companion field into a package's modules
-bunx fw-codegen deps --pkg packages/front/office/pdf
+bunx fw-codegen deps --pkg path/to/fw-shaped-package
 
 # Report the planned deps edits without writing
-bunx fw-codegen deps --pkg packages/front/office/pdf --dry-run
+bunx fw-codegen deps --pkg path/to/fw-shaped-package --dry-run
 
 # Exclude an extra subtree from the deps scan (repeatable; unioned with the
 # default ignore of generated `src/bundles/prebuilt/**`)
-bunx fw-codegen deps --pkg packages/front/office/md --ignore "legacy/**"
+bunx fw-codegen deps --pkg path/to/fw-shaped-package --ignore "legacy/**"
 
 # Audit a package's factory @returns annotations (read-only report)
-bunx fw-codegen audit --pkg packages/front/fw
+bunx fw-codegen audit --pkg path/to/fw-shaped-package
 
 # Only print the LOSSY/INLINE fix-list sections
-bunx fw-codegen audit --pkg packages/front/fw --lossy-only
+bunx fw-codegen audit --pkg path/to/fw-shaped-package --lossy-only
 ```
 
 `--pkg <dir>` selects the package root (`src/`, `types/`, `dist/types/` resolve
@@ -79,10 +70,17 @@ resulting file is reported as unresolved instead of written. See
 Direct invocation without the `bin` is equivalent:
 
 ```bash
-bun node_modules/@awacloud/tool-fw-codegen/src/registry/index.js --pkg packages/front/fw --check
-bun node_modules/@awacloud/tool-fw-codegen/src/deps/index.js --pkg packages/front/office/pdf --dry-run
-bun node_modules/@awacloud/tool-fw-codegen/src/audit/index.js --pkg packages/front/fw --lossy-only
+bun node_modules/@awacloud/tool-fw-codegen/src/registry/index.js --pkg path/to/fw-shaped-package --check
+bun node_modules/@awacloud/tool-fw-codegen/src/deps/index.js --pkg path/to/fw-shaped-package --dry-run
+bun node_modules/@awacloud/tool-fw-codegen/src/audit/index.js --pkg path/to/fw-shaped-package --lossy-only
 ```
+
+## Consumption shape
+
+**Autonomous — standalone `bin`.** This package ships its own `fw-codegen`
+executable (`bin/fw-codegen.ts`, a thin delegate to `src/index.ts` — no
+argument parsing duplicated), so it runs directly once installed:
+`bunx fw-codegen <command> …`.
 
 ## Structure
 
@@ -151,6 +149,19 @@ literal, and byte-compares `audit`'s rendered report against fw's own
 - [`@awacloud/tool-fw-bundler`](https://github.com/awacloud/awa/tree/main/tools/fw-bundler) — the sibling package that hosts `./modlib`.
 - [`@awacloud/fw`](https://github.com/awacloud/awa/tree/main/packages/front/fw) — the framework whose codegen tools this package ports.
 
+## Exposed sub-paths
+
+| Sub-path | Target | Usage |
+|---|---|---|
+| `.` | `./src/index.ts` | The CLI dispatcher (`registry`, `deps`, `audit`); the `fw-codegen` bin delegates here. It exits the process when loaded: run it, do not import it. |
+| `./registry` | `./src/registry/index.js` | The registry generator: `renderRegistry`, `runCli`. |
+| `./deps` | `./src/deps/index.js` | The `deps` injector: `planDeps`, `runDeps`, `runCli`, `DEFAULT_IGNORE`, plus the scan helpers `filterScan`, `resolveWorkspacePackage`, `publicSubpathFor`, `stripComments`. |
+| `./audit` | `./src/audit/index.js` | The `@returns` audit: `computeAudit`, `renderAudit`, `runCli`. |
+
+## Maturity
+
+Level `L2` (`awa.maturity` in `package.json`).
+
 ## Licence
 
 Apache-2.0 — see [`LICENSE`](LICENSE) in this package.
@@ -159,7 +170,7 @@ Copyright (c) 2026 AwaCloud SAS
 
 ## Project
 
-- Website: https://awaforge.eu
+- Website: https://awaforge.eu/
 - Source: [`tools/fw-codegen`](https://github.com/awacloud/awa/tree/main/tools/fw-codegen)
 - Issues: this package's own repository has issues disabled — report at
   https://github.com/awacloud/awa/issues
